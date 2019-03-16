@@ -6,7 +6,7 @@ Before building, you should checkout branch
 cd llvm && build_llvm.sh
 ```
 
-## Build Hikari-llvm
+## Build [Hikari-llvm](https://github.com/HikariObfuscator/Hikari)
 
 Read the [code-signing.txt](https://github.com/llvm-mirror/lldb/blob/master/docs/code-signing.txt) first.
 
@@ -14,7 +14,7 @@ Read the [code-signing.txt](https://github.com/llvm-mirror/lldb/blob/master/docs
 cd hikari && build_llvm.sh
 ```
 
-## Build Obfuscator-llvm
+## Build [Obfuscator-llvm](https://github.com/heroims/obfuscator) (heroims's fork)
 
 ```bash
 cd obfuscator && build_llvm.sh
