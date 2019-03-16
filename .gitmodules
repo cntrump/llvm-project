@@ -1,0 +1,6 @@
+[submodule "obfuscator"]
+	path = obfuscator
+	url = https://github.com/heroims/obfuscator.git
+[submodule "hikari"]
+	path = hikari
+	url = https://github.com/HikariObfuscator/Hikari.git
