@@ -32,8 +32,6 @@ cmake -DCMAKE_INSTALL_PREFIX=${output} \
       -DCMAKE_BUILD_TYPE=Release \
       -DLLVM_INCLUDE_TESTS=Off \
       -DLLVM_INCLUDE_EXAMPLES=Off \
-      -DLLVM_ENABLE_LIBCXX=ON \
-      -DLLVM_ENABLE_CXX1Y=ON \
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;compiler-rt;libunwind;polly;lld" \
       -DLLVM_CREATE_XCODE_TOOLCHAIN=ON \
       -GNinja \
