@@ -8,8 +8,8 @@ cd llvm && build_llvm.sh
 
 ## Build [Hikari-llvm](https://github.com/HikariObfuscator/Hikari)
 
-Read the [code-signing.txt](https://github.com/llvm-mirror/lldb/blob/master/docs/code-signing.txt) first.
-How to [use hikari](https://github.com/HikariObfuscator/Hikari/wiki/Usage)
+1. Read the [code-signing.txt](https://github.com/llvm-mirror/lldb/blob/master/docs/code-signing.txt) first.
+2. How to [use hikari](https://github.com/HikariObfuscator/Hikari/wiki/Usage)
 
 ```bash
 cd hikari && build_llvm.sh
