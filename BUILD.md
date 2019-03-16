@@ -8,6 +8,8 @@ cd llvm && build_llvm.sh
 
 ## Build Hikari-llvm
 
+Read the [code-signing.txt](https://github.com/llvm-mirror/lldb/blob/master/docs/code-signing.txt) first.
+
 ```bash
 cd hikari && build_llvm.sh
 ```
@@ -32,6 +34,7 @@ cmake -DCMAKE_INSTALL_PREFIX=${output} \
       -DCMAKE_BUILD_TYPE=Release \
       -DLLVM_INCLUDE_TESTS=Off \
       -DLLVM_INCLUDE_EXAMPLES=Off \
+      -DLLDB_CODESIGN_IDENTITY='' \
       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;compiler-rt;libunwind;polly;lld" \
       -DLLVM_CREATE_XCODE_TOOLCHAIN=ON \
       -GNinja \
