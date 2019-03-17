@@ -47,3 +47,14 @@ ninja install-xcode-toolchain
 echo build finish.
 echo toolchain installed at ${output}
 ```
+
+### A simple way to use Hikari and Obfuscator
+
+1. Add a xcconfig file to your project
+2. Add `-mllvm xxx` to `OTHER_CFLAGS`
+
+example for Hikari:
+
+```bash
+OTHER_CFLAGS = $(inherited) -mllvm -enable-bcfobf -mllvm -enable-cffobf -mllvm -enable-splitobf -mllvm -enable-subobf -mllvm -enable-indibran
+```
