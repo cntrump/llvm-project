@@ -672,10 +672,16 @@ def warn_assume_side_effects : Warning<
   "the argument to %0 has side effects that will be discarded">,
   InGroup<DiagGroup<"assume">>;
 
-def warn_memcpy_chk_overflow : Warning<
+def warn_builtin_chk_overflow : Warning<
   "'%0' will always overflow; destination buffer has size %1,"
   " but size argument is %2">,
   InGroup<DiagGroup<"builtin-memcpy-chk-size">>;
+
+def warn_fortify_source_overflow
+  : Warning<warn_builtin_chk_overflow.Text>, InGroup<FortifySource>;
+def warn_fortify_source_size_mismatch : Warning<
+  "'%0' size argument is too large; destination buffer has size %1,"
+  " but size argument is %2">, InGroup<FortifySource>;
 
 /// main()
 // static main() is not an error in C, just in C++.
@@ -3599,12 +3605,11 @@ def err_ovl_no_viable_member_function_in_call : Error<
   "no matching member function for call to %0">;
 def err_ovl_ambiguous_call : Error<
   "call to %0 is ambiguous">;
-def err_ovl_deleted_call : Error<
-  "call to %select{unavailable|deleted}0 function %1%2">;
+def err_ovl_deleted_call : Error<"call to deleted function %0">;
 def err_ovl_ambiguous_member_call : Error<
   "call to member function %0 is ambiguous">;
 def err_ovl_deleted_member_call : Error<
-  "call to %select{unavailable|deleted}0 member function %1%2">;
+  "call to deleted member function %0">;
 def note_ovl_too_many_candidates : Note<
     "remaining %0 candidate%s0 omitted; "
     "pass -fshow-overloads=all to show them">;
@@ -3818,7 +3823,7 @@ def err_ovl_ambiguous_init : Error<"call to constructor of %0 is ambiguous">;
 def err_ref_init_ambiguous : Error<
   "reference initialization of type %0 with initializer of type %1 is ambiguous">;
 def err_ovl_deleted_init : Error<
-  "call to %select{unavailable|deleted}0 constructor of %1">;
+  "call to deleted constructor of %0">;
 def err_ovl_deleted_special_init : Error<
   "call to implicitly-deleted %select{default constructor|copy constructor|"
   "move constructor|copy assignment operator|move assignment operator|"
@@ -3830,7 +3835,7 @@ def err_ovl_ambiguous_oper_binary : Error<
 def err_ovl_no_viable_oper : Error<"no viable overloaded '%0'">;
 def note_assign_lhs_incomplete : Note<"type %0 is incomplete">;
 def err_ovl_deleted_oper : Error<
-  "overload resolution selected %select{unavailable|deleted}0 operator '%1'%2">;
+  "overload resolution selected deleted operator '%0'">;
 def err_ovl_deleted_special_oper : Error<
   "object of type %0 cannot be %select{constructed|copied|moved|assigned|"
   "assigned|destroyed}1 because its %sub{select_special_member_kind}1 is implicitly deleted">;
@@ -3851,7 +3856,7 @@ def err_ovl_no_viable_object_call : Error<
 def err_ovl_ambiguous_object_call : Error<
   "call to object of type %0 is ambiguous">;
 def err_ovl_deleted_object_call : Error<
-  "call to %select{unavailable|deleted}0 function call operator in type %1%2">;
+  "call to deleted function call operator in type %0">;
 def note_ovl_surrogate_cand : Note<"conversion candidate of type %0">;
 def err_member_call_without_object : Error<
   "call to non-static member function without an object argument">;
@@ -9135,6 +9140,17 @@ def err_omp_invalid_map_this_expr : Error <
   "invalid 'this' expression on 'map' clause">;
 def err_implied_omp_allocator_handle_t_not_found : Error<
   "omp_allocator_handle_t type not found; include <omp.h>">;
+def err_omp_expected_predefined_allocator : Error<
+  "expected one of the predefined allocators for the variables with the static "
+  "storage: 'omp_default_mem_alloc', 'omp_large_cap_mem_alloc', "
+  "'omp_const_mem_alloc', 'omp_high_bw_mem_alloc', 'omp_low_lat_mem_alloc', "
+  "'omp_cgroup_mem_alloc', 'omp_pteam_mem_alloc' or 'omp_thread_mem_alloc'">;
+def warn_omp_used_different_allocator : Warning<
+  "allocate directive specifies %select{default|'%1'}0 allocator while "
+  "previously used %select{default|'%3'}2">,
+  InGroup<OpenMPClauses>;
+def note_omp_previous_allocator : Note<
+  "previous allocator is specified here">;
 } // end of OpenMP category
 
 let CategoryName = "Related Result Type Issue" in {
@@ -9251,6 +9267,8 @@ def err_coroutine_objc_method : Error<
   "Objective-C methods as coroutines are not yet supported">;
 def err_coroutine_unevaluated_context : Error<
   "'%0' cannot be used in an unevaluated context">;
+def err_coroutine_within_handler : Error<
+  "'%0' cannot be used in the handler of a try block">;
 def err_coroutine_outside_function : Error<
   "'%0' cannot be used outside a function">;
 def err_coroutine_invalid_func_context : Error<

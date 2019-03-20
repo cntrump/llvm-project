@@ -639,7 +639,8 @@ bool AMDGPUTargetLowering::isSelectSupported(SelectSupportKind SelType) const {
 
 // The backend supports 32 and 64 bit floating point immediates.
 // FIXME: Why are we reporting vectors of FP immediates as legal?
-bool AMDGPUTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT) const {
+bool AMDGPUTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
+                                        bool ForCodeSize) const {
   EVT ScalarVT = VT.getScalarType();
   return (ScalarVT == MVT::f32 || ScalarVT == MVT::f64 ||
          (ScalarVT == MVT::f16 && Subtarget->has16BitInsts()));
@@ -1008,9 +1009,10 @@ void AMDGPUTargetLowering::analyzeFormalArgumentsCompute(
       if (MemVT.isVector() && MemVT.getVectorNumElements() == 1)
         MemVT = MemVT.getScalarType();
 
-      if (MemVT.isExtended()) {
-        // This should really only happen if we have vec3 arguments
-        assert(MemVT.isVector() && MemVT.getVectorNumElements() == 3);
+      // Round up vec3/vec5 argument.
+      if (MemVT.isVector() && !MemVT.isPow2VectorType()) {
+        assert(MemVT.getVectorNumElements() == 3 ||
+               MemVT.getVectorNumElements() == 5);
         MemVT = MemVT.getPow2VectorType(State.getContext());
       }
 
@@ -4206,10 +4208,16 @@ const char* AMDGPUTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(ATOMIC_LOAD_FMIN)
   NODE_NAME_CASE(ATOMIC_LOAD_FMAX)
   NODE_NAME_CASE(BUFFER_LOAD)
+  NODE_NAME_CASE(BUFFER_LOAD_UBYTE)
+  NODE_NAME_CASE(BUFFER_LOAD_USHORT)
+  NODE_NAME_CASE(BUFFER_LOAD_BYTE)
+  NODE_NAME_CASE(BUFFER_LOAD_SHORT)
   NODE_NAME_CASE(BUFFER_LOAD_FORMAT)
   NODE_NAME_CASE(BUFFER_LOAD_FORMAT_D16)
   NODE_NAME_CASE(SBUFFER_LOAD)
   NODE_NAME_CASE(BUFFER_STORE)
+  NODE_NAME_CASE(BUFFER_STORE_BYTE)
+  NODE_NAME_CASE(BUFFER_STORE_SHORT)
   NODE_NAME_CASE(BUFFER_STORE_FORMAT)
   NODE_NAME_CASE(BUFFER_STORE_FORMAT_D16)
   NODE_NAME_CASE(BUFFER_ATOMIC_SWAP)
@@ -4374,6 +4382,14 @@ void AMDGPUTargetLowering::computeKnownBitsForTargetNode(
     }
     break;
   }
+  case AMDGPUISD::BUFFER_LOAD_UBYTE:  {
+    Known.Zero.setHighBits(24);
+    break;
+  }
+  case AMDGPUISD::BUFFER_LOAD_USHORT: {
+    Known.Zero.setHighBits(16);
+    break;
+  }
   case ISD::INTRINSIC_WO_CHAIN: {
     unsigned IID = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
     switch (IID) {
@@ -4419,6 +4435,14 @@ unsigned AMDGPUTargetLowering::ComputeNumSignBitsForTargetNode(
   case AMDGPUISD::CARRY:
   case AMDGPUISD::BORROW:
     return 31;
+  case AMDGPUISD::BUFFER_LOAD_BYTE:
+    return 25;
+  case AMDGPUISD::BUFFER_LOAD_SHORT:
+    return 17;
+  case AMDGPUISD::BUFFER_LOAD_UBYTE:
+    return 24;
+  case AMDGPUISD::BUFFER_LOAD_USHORT:
+    return 16;
   case AMDGPUISD::FP_TO_FP16:
   case AMDGPUISD::FP16_ZEXT:
     return 16;

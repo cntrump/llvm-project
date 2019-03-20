@@ -115,6 +115,9 @@ Improvements to clang-tidy
   `CommentUserDefiniedLiterals`, `CommentStringLiterals`,
   `CommentCharacterLiterals` & `CommentNullPtrs` options.
 
+- The :doc:`google-runtime-int <clang-tidy/checks/google-runtime-int>`
+  check has been disabled in Objective-C++.
+
 - The `Acronyms` and `IncludeDefaultAcronyms` options for the
   :doc:`objc-property-declaration <clang-tidy/checks/objc-property-declaration>`
   check have been removed.
@@ -132,3 +135,9 @@ Improvements to modularize
 --------------------------
 
 The improvements are...
+
+Improvements to pp-trace
+------------------------
+
+- Added a new option `-callbacks` to filter preprocessor callbacks. It replaces
+  the `-ignore` option.

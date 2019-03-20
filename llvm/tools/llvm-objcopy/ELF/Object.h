@@ -107,7 +107,7 @@ protected:
   Buffer &Out;
 
 public:
-  virtual ~SectionWriter(){};
+  virtual ~SectionWriter() = default;
 
   void visit(const Section &Sec) override;
   void visit(const OwnedDataSection &Sec) override;
@@ -421,7 +421,7 @@ public:
 
   void addString(StringRef Name);
   uint32_t findIndex(StringRef Name) const;
-  void finalize() override;
+  void prepareForLayout();
   void accept(SectionVisitor &Visitor) const override;
   void accept(MutableSectionVisitor &Visitor) override;
 
@@ -529,6 +529,8 @@ public:
   void accept(SectionVisitor &Visitor) const override;
   void accept(MutableSectionVisitor &Visitor) override;
   Error removeSymbols(function_ref<bool(const Symbol &)> ToRemove) override;
+  void replaceSectionReferences(
+      const DenseMap<SectionBase *, SectionBase *> &FromTo) override;
 
   static bool classof(const SectionBase *S) {
     return S->Type == ELF::SHT_SYMTAB;
