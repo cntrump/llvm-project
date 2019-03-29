@@ -17,6 +17,7 @@
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/CodeGen/ISDOpcodes.h"
@@ -121,7 +122,7 @@ class SelectionDAGBuilder {
 
   /// Keeps track of dbg_values for which we have not yet seen the referent.
   /// We defer handling these until we do see it.
-  DenseMap<const Value*, DanglingDebugInfoVector> DanglingDebugInfoMap;
+  MapVector<const Value*, DanglingDebugInfoVector> DanglingDebugInfoMap;
 
 public:
   /// Loads are not emitted to the program immediately.  We bunch them up and
@@ -277,11 +278,12 @@ private:
     const Value *SValue;
     MachineBasicBlock *HeaderBB;
     bool Emitted;
+    bool OmitRangeCheck;
 
     JumpTableHeader(APInt F, APInt L, const Value *SV, MachineBasicBlock *H,
                     bool E = false)
         : First(std::move(F)), Last(std::move(L)), SValue(SV), HeaderBB(H),
-          Emitted(E) {}
+          Emitted(E), OmitRangeCheck(false) {}
   };
   using JumpTableBlock = std::pair<JumpTableHeader, JumpTable>;
 

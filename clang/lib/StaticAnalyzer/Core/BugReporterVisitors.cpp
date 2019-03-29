@@ -161,8 +161,8 @@ const Expr *bugreporter::getDerefExpr(const Stmt *S) {
 /// are the immediate snapshots of the tracked region's bindings within the
 /// node's respective states but not really checking that these snapshots
 /// actually contain the same set of bindings.
-bool hasVisibleUpdate(const ExplodedNode *LeftNode, SVal LeftVal,
-                      const ExplodedNode *RightNode, SVal RightVal) {
+static bool hasVisibleUpdate(const ExplodedNode *LeftNode, SVal LeftVal,
+                             const ExplodedNode *RightNode, SVal RightVal) {
   if (LeftVal == RightVal)
     return true;
 
@@ -2442,7 +2442,7 @@ void FalsePositiveRefutationBRVisitor::finalizeVisitor(
   VisitNode(EndPathNode, BRC, BR);
 
   // Create a refutation manager
-  SMTSolverRef RefutationSolver = CreateZ3Solver();
+  llvm::SMTSolverRef RefutationSolver = llvm::CreateZ3Solver();
   ASTContext &Ctx = BRC.getASTContext();
 
   // Add constraints to the solver
@@ -2450,7 +2450,7 @@ void FalsePositiveRefutationBRVisitor::finalizeVisitor(
     const SymbolRef Sym = I.first;
     auto RangeIt = I.second.begin();
 
-    SMTExprRef Constraints = SMTConv::getRangeExpr(
+    llvm::SMTExprRef Constraints = SMTConv::getRangeExpr(
         RefutationSolver, Ctx, Sym, RangeIt->From(), RangeIt->To(),
         /*InRange=*/true);
     while ((++RangeIt) != I.second.end()) {

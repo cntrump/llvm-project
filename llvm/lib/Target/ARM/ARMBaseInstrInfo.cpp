@@ -1176,7 +1176,8 @@ unsigned ARMBaseInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
 unsigned ARMBaseInstrInfo::isStoreToStackSlotPostFE(const MachineInstr &MI,
                                                     int &FrameIndex) const {
   SmallVector<const MachineMemOperand *, 1> Accesses;
-  if (MI.mayStore() && hasStoreToStackSlot(MI, Accesses)) {
+  if (MI.mayStore() && hasStoreToStackSlot(MI, Accesses) &&
+      Accesses.size() == 1) {
     FrameIndex =
         cast<FixedStackPseudoSourceValue>(Accesses.front()->getPseudoValue())
             ->getFrameIndex();
@@ -1396,7 +1397,8 @@ unsigned ARMBaseInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
 unsigned ARMBaseInstrInfo::isLoadFromStackSlotPostFE(const MachineInstr &MI,
                                                      int &FrameIndex) const {
   SmallVector<const MachineMemOperand *, 1> Accesses;
-  if (MI.mayLoad() && hasLoadFromStackSlot(MI, Accesses)) {
+  if (MI.mayLoad() && hasLoadFromStackSlot(MI, Accesses) &&
+      Accesses.size() == 1) {
     FrameIndex =
         cast<FixedStackPseudoSourceValue>(Accesses.front()->getPseudoValue())
             ->getFrameIndex();
@@ -3433,7 +3435,12 @@ unsigned ARMBaseInstrInfo::getNumLDMAddresses(const MachineInstr &MI) const {
        I != E; ++I) {
     Size += (*I)->getSize();
   }
-  return Size / 4;
+  // FIXME: The scheduler currently can't handle values larger than 16. But
+  // the values can actually go up to 32 for floating-point load/store
+  // multiple (VLDMIA etc.). Also, the way this code is reasoning about memory
+  // operations isn't right; we could end up with "extra" memory operands for
+  // various reasons, like tail merge merging two memory operations.
+  return std::min(Size / 4, 16U);
 }
 
 static unsigned getNumMicroOpsSingleIssuePlusExtras(unsigned Opc,
